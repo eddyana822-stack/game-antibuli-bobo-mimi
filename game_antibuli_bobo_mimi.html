@@ -1,0 +1,221 @@
+<!DOCTYPE html>
+<html lang="ms">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Pengembaraan Bobo & Mimi — Hentikan Buli</title>
+<style>
+  :root { --purple:#7157d9; --pink:#ff8fb1; --cream:#fff8ed; --ink:#292343; --green:#48b88a; }
+  * { box-sizing:border-box; }
+  body { margin:0; font-family: "Trebuchet MS", Arial, sans-serif; color:var(--ink); background:linear-gradient(135deg,#fff0f6,#eeeaff 55%,#e9fff5); min-height:100vh; }
+  .wrap { width:min(900px,94%); margin:0 auto; padding:24px 0 40px; }
+  header { text-align:center; padding:14px 10px 20px; }
+  .eyebrow { text-transform:uppercase; letter-spacing:2px; font-size:.75rem; font-weight:800; color:var(--purple); }
+  h1 { font-size:clamp(2rem,5vw,3.3rem); line-height:1.08; margin:8px 0; }
+  .subtitle { margin:0 auto; max-width:600px; line-height:1.6; }
+  .book { background:rgba(255,255,255,.9); border:3px solid white; border-radius:28px; box-shadow:0 16px 45px #54418a1c; overflow:hidden; }
+  .topline { height:10px; background:linear-gradient(90deg,var(--pink),#ffc86d,var(--green),var(--purple)); }
+  .content { padding:clamp(18px,4vw,36px); }
+  .progress-row { display:flex; justify-content:space-between; gap:10px; align-items:center; font-size:.9rem; font-weight:800; margin-bottom:10px; }
+  .track { height:10px; background:#eeeaf9; border-radius:99px; overflow:hidden; margin-bottom:24px; }
+  #progress { height:100%; width:0%; background:linear-gradient(90deg,var(--pink),var(--purple)); transition:width .4s; }
+  .scene { display:grid; grid-template-columns:150px 1fr; gap:24px; align-items:center; }
+  .characters { display:flex; flex-direction:column; gap:8px; align-items:center; }
+  .buddy { width:116px; height:116px; border-radius:28px; display:grid; place-items:center; font-size:4rem; background:#fff0c9; box-shadow:inset 0 -7px #f0d99b; animation:bob 2.5s ease-in-out infinite; }
+  .buddy.rabbit { background:#ffe5ee; box-shadow:inset 0 -7px #ffc3d6; animation-delay:.3s; }
+  .name { font-size:.8rem; font-weight:900; }
+  h2 { margin:0 0 12px; font-size:clamp(1.35rem,3vw,2rem); }
+  #story { font-size:1.06rem; line-height:1.75; margin:0; }
+  .speech { background:#f7f4ff; border-left:5px solid var(--purple); padding:15px 17px; border-radius:12px; margin-top:18px; line-height:1.6; }
+  .choices { display:grid; grid-template-columns:1fr 1fr; gap:12px; margin-top:22px; }
+  button { font:inherit; font-weight:800; border:0; border-radius:14px; padding:14px 16px; cursor:pointer; transition:transform .15s, box-shadow .15s, background .15s; }
+  button:hover { transform:translateY(-2px); }
+  button:focus-visible { outline:3px solid #30205e; outline-offset:3px; }
+  .primary { background:var(--purple); color:white; box-shadow:0 5px 0 #4e39ad; }
+  .choice { text-align:left; background:white; color:var(--ink); border:2px solid #e7e1f6; min-height:66px; }
+  .choice:hover { border-color:var(--purple); }
+  .secondary { background:#fff0f6; color:#8e3158; }
+  .feedback { margin-top:16px; padding:14px 16px; border-radius:14px; line-height:1.55; display:none; }
+  .feedback.good { display:block; background:#e8fff3; border:1px solid #a8e8c9; }
+  .feedback.try { display:block; background:#fff5dd; border:1px solid #f2d48c; }
+  .hidden { display:none !important; }
+  .center { text-align:center; }
+  .big-emoji { font-size:4rem; animation:pop .45s ease-out; }
+  .score { font-size:clamp(2.5rem,8vw,4.5rem); font-weight:900; color:var(--purple); margin:8px 0; }
+  .badge { display:inline-block; padding:7px 12px; background:#fff0c9; border-radius:999px; font-weight:800; font-size:.85rem; }
+  footer { text-align:center; font-size:.85rem; opacity:.75; padding:18px 10px 0; line-height:1.5; }
+  @keyframes bob { 0%,100%{transform:translateY(0) rotate(-2deg)} 50%{transform:translateY(-7px) rotate(2deg)} }
+  @keyframes pop { from{transform:scale(.5);opacity:0} to{transform:scale(1);opacity:1} }
+  @media(max-width:600px) { .scene { grid-template-columns:1fr; gap:16px; } .characters { flex-direction:row; justify-content:center; } .buddy { width:82px;height:82px;font-size:3rem;border-radius:22px; } .choices { grid-template-columns:1fr; } .content { padding:20px; } }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <div class="eyebrow">Buku digital interaktif</div>
+    <h1>🐻 Bobo & Mimi 🐰<br>Hentikan Buli!</h1>
+    <p class="subtitle">Ikuti cerita, pilih tindakan yang baik dan kumpulkan markah sebagai Sahabat Berani.</p>
+  </header>
+
+  <main class="book">
+    <div class="topline"></div>
+    <div class="content">
+      <div class="progress-row"><span id="stepLabel">Muka surat 1 daripada 6</span><span>⭐ Markah: <span id="scoreLabel">0</span></span></div>
+      <div class="track"><div id="progress"></div></div>
+
+      <section id="startScreen" class="center">
+        <div class="big-emoji">🌈📖</div>
+        <h2>Jom jadi Sahabat Berani!</h2>
+        <p id="story">Di Hutan Pelangi, Bobo si beruang dan Mimi si arnab belajar cara membantu rakan yang dibuli. Kamu akan membuat pilihan dalam cerita dan menjawab kuiz ringkas.</p>
+        <p class="speech">💡 Ingat: buli bukan gurauan jika seseorang disakiti atau dibuat berasa takut. Kita boleh membantu dengan cara yang selamat.</p>
+        <button class="primary" id="startBtn">Mula Pengembaraan →</button>
+      </section>
+
+      <section id="gameScreen" class="hidden">
+        <div class="scene">
+          <div class="characters">
+            <div><div class="buddy">🐻</div><div class="name center">BOBO</div></div>
+            <div><div class="buddy rabbit">🐰</div><div class="name center">MIMI</div></div>
+          </div>
+          <div>
+            <h2 id="sceneTitle"></h2>
+            <p id="sceneText"></p>
+            <div class="speech" id="prompt"></div>
+          </div>
+        </div>
+        <div class="choices" id="choices"></div>
+        <div id="feedback" class="feedback" role="status" aria-live="polite"></div>
+        <div class="center" style="margin-top:18px"><button id="nextBtn" class="primary hidden">Teruskan →</button></div>
+      </section>
+
+      <section id="endScreen" class="hidden center">
+        <div class="big-emoji" id="endEmoji">🏆</div>
+        <h2 id="endTitle">Tahniah!</h2>
+        <p>Pengembaraan kamu sudah selesai.</p>
+        <div class="score"><span id="finalScore">0</span>/50</div>
+        <div class="badge" id="rank">Sahabat Berani</div>
+        <p id="endMessage" style="line-height:1.7;max-width:560px;margin:18px auto"></p>
+        <button class="primary" id="restartBtn">Main Semula ↻</button>
+      </section>
+    </div>
+  </main>
+  <footer>Dibina untuk pembelajaran antibuli • Bobo & Mimi mengingatkan kita supaya memilih kebaikan.</footer>
+</div>
+<script>
+const scenes = [
+  {
+    title:"Muka Surat 1 — Mimi Diejek",
+    text:"Pada suatu pagi, Mimi datang ke sekolah dengan beg baharu. Beberapa haiwan mentertawakan begnya dan memanggilnya dengan nama yang menyakitkan hati. Mimi menunduk dan kelihatan sedih.",
+    prompt:"Apakah tindakan terbaik yang boleh Bobo lakukan?",
+    choices:[
+      {text:"A. Ikut ketawakan Mimi",correct:false,feedback:"Mengejek boleh membuat Mimi lebih terluka. Kita tidak patut menyertai perbuatan buli."},
+      {text:"B. Temani Mimi dan beritahu bahawa mengejek itu tidak baik",correct:true,feedback:"Bagus! Menyokong Mimi dan menegur dengan tenang ialah tindakan yang baik."}
+    ], points:10
+  },
+  {
+    title:"Muka Surat 2 — Pilih Tindakan Selamat",
+    text:"Bobo nampak seekor haiwan menolak Mimi dan mengugut untuk mengambil bekalnya. Keadaan mula menjadi tegang.",
+    prompt:"Apa yang patut Bobo lakukan jika keadaan tidak selamat?",
+    choices:[
+      {text:"A. Melawan dan menolak haiwan itu balik",correct:false,feedback:"Membalas dengan kekerasan boleh memburukkan keadaan. Utamakan keselamatan."},
+      {text:"B. Minta bantuan guru atau orang dewasa yang dipercayai",correct:true,feedback:"Betul! Dapatkan bantuan orang dewasa yang boleh campur tangan dengan selamat."}
+    ], points:10
+  },
+  {
+    title:"Muka Surat 3 — Jangan Jadi Penonton",
+    text:"Di taman, sekumpulan haiwan berkongsi gambar Mimi yang memalukan dalam kumpulan sembang. Ada yang menambah komen jahat.",
+    prompt:"Apakah pilihan paling bertanggungjawab?",
+    choices:[
+      {text:"A. Jangan sebarkan gambar itu dan laporkan kepada orang dewasa",correct:true,feedback:"Tepat! Jangan menyebarkan kandungan yang memalukan. Simpan bukti jika selamat dan minta bantuan."},
+      {text:"B. Kongsi gambar itu supaya lebih ramai melihat",correct:false,feedback:"Menyebarkan gambar akan menambahkan kesan buli siber dan menyakiti Mimi."}
+    ], points:10
+  },
+  {
+    title:"Muka Surat 4 — Mimi Perlukan Sokongan",
+    text:"Mimi memberitahu Bobo bahawa dia takut untuk datang ke sekolah. Bobo mendengar dengan teliti.",
+    prompt:"Apakah yang patut Bobo katakan kepada Mimi?",
+    choices:[
+      {text:"A. “Jangan mengada-ngada, itu gurauan saja.”",correct:false,feedback:"Kata-kata ini meremehkan perasaan Mimi. Setiap orang berhak didengar dan dihormati."},
+      {text:"B. “Terima kasih sebab beritahu. Mari kita cari bantuan bersama.”",correct:true,feedback:"Bagus! Mendengar tanpa menyalahkan dan menemani Mimi mendapatkan bantuan boleh membuatnya rasa disokong."}
+    ], points:10
+  },
+  {
+    title:"Muka Surat 5 — Kuiz Sahabat Berani",
+    text:"Bobo dan Mimi mengulang semula perkara yang mereka pelajari hari ini.",
+    prompt:"Pilih tindakan yang membantu menghentikan buli.",
+    choices:[
+      {text:"A. Berdiam diri walaupun seseorang dalam bahaya",correct:false,feedback:"Jika selamat, dapatkan bantuan. Jangan biarkan orang yang dibuli menghadapinya seorang diri."},
+      {text:"B. Sokong mangsa, jangan ikut mengejek dan laporkan kepada orang dipercayai",correct:true,feedback:"Tepat! Sokongan, tidak menyertai buli dan mendapatkan bantuan ialah langkah yang baik."}
+    ], points:10
+  }
+];
+let index = 0, score = 0, answered = false;
+const $ = id => document.getElementById(id);
+function updateProgress(){
+  $("stepLabel").textContent = `Muka surat ${Math.min(index+1,6)} daripada 6`;
+  $("scoreLabel").textContent = score;
+  $("progress").style.width = `${Math.min(index/5*100,100)}%`;
+}
+function start(){
+  index=0; score=0; answered=false;
+  $("startScreen").classList.add("hidden");
+  $("endScreen").classList.add("hidden");
+  $("gameScreen").classList.remove("hidden");
+  renderScene();
+}
+function renderScene(){
+  answered=false;
+  const s=scenes[index];
+  updateProgress();
+  $("sceneTitle").textContent=s.title;
+  $("sceneText").textContent=s.text;
+  $("prompt").textContent=s.prompt;
+  $("feedback").className="feedback";
+  $("feedback").textContent="";
+  $("nextBtn").classList.add("hidden");
+  $("choices").innerHTML="";
+  s.choices.forEach((choice,i)=>{
+    const b=document.createElement("button");
+    b.className="choice";
+    b.textContent=choice.text;
+    b.addEventListener("click",()=>choose(choice,b));
+    $("choices").appendChild(b);
+  });
+}
+function choose(choice,button){
+  if(answered) return;
+  answered=true;
+  document.querySelectorAll("#choices button").forEach(b=>b.disabled=true);
+  if(choice.correct){ score+=scenes[index].points; button.style.borderColor="#48b88a"; button.style.background="#e8fff3"; }
+  else { button.style.borderColor="#f0bd54"; button.style.background="#fff5dd"; }
+  $("scoreLabel").textContent=score;
+  $("feedback").className="feedback "+(choice.correct?"good":"try");
+  $("feedback").textContent=(choice.correct?"🌟 Bagus! ":"💛 Cuba belajar lagi. ")+choice.feedback;
+  $("nextBtn").textContent=index===scenes.length-1?"Lihat Keputusan →":"Muka Surat Seterusnya →";
+  $("nextBtn").classList.remove("hidden");
+}
+function next(){
+  if(index<scenes.length-1){ index++; renderScene(); }
+  else showEnd();
+}
+function showEnd(){
+  $("gameScreen").classList.add("hidden");
+  $("endScreen").classList.remove("hidden");
+  $("progress").style.width="100%";
+  $("stepLabel").textContent="Selesai!";
+  $("finalScore").textContent=score;
+  let rank, message, emoji;
+  if(score>=40){rank="🏆 Sahabat Berani";message="Hebat! Kamu tahu cara menyokong rakan, memilih tindakan selamat dan mendapatkan bantuan. Terus sebarkan kebaikan!";emoji="🏆";}
+  else if(score>=20){rank="🌟 Sahabat Prihatin";message="Bagus! Kamu sudah belajar beberapa cara menghentikan buli. Cuba main sekali lagi untuk mengukuhkan pengetahuan.";emoji="🌟";}
+  else {rank="🌱 Sahabat Yang Sedang Belajar";message="Teruskan belajar! Ingat, jangan ikut membuli, sokong rakan yang disakiti dan dapatkan bantuan orang dewasa yang dipercayai.";emoji="🌱";}
+  $("rank").textContent=rank; $("endMessage").textContent=message; $("endEmoji").textContent=emoji;
+}
+$("startBtn").addEventListener("click",start);
+$("nextBtn").addEventListener("click",next);
+$("restartBtn").addEventListener("click",()=>{
+  $("endScreen").classList.add("hidden"); $("startScreen").classList.remove("hidden");
+  $("progress").style.width="0%"; $("stepLabel").textContent="Muka surat 1 daripada 6"; $("scoreLabel").textContent="0";
+});
+</script>
+</body>
+</html>
